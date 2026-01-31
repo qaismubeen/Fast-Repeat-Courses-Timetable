@@ -52,7 +52,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 15px;
     }
 
@@ -65,7 +65,7 @@
 
     button.primary {
       background: var(--primary);
-      color: white;
+      color: green;
       border: none;
       cursor: pointer;
       font-weight: bold;
@@ -128,7 +128,7 @@
 </head>
 <body>
 
-<header>FAST NUCES Islamabad – PF Class Schedule</header>
+<header>Repeat Courses Timetable</header>
 
 <div class="container">
 
@@ -150,6 +150,7 @@
       <option>Monday</option>
       <option>Tuesday</option>
       <option>Wednesday</option>
+      <option>Thursday</option>
       <option>Friday</option>
     </select>
 
@@ -202,7 +203,7 @@ const scheduleData = {
   "Friday-CS-C": { course: "PF", location: "C-303", time: "11:30 - 12:50" }
 };
 
-const days = ["Monday","Tuesday","Wednesday","Friday"];
+const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
 
 const sectionEl = document.getElementById("section");
 const dayEl = document.getElementById("day");
