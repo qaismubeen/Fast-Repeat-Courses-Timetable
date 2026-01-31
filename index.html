@@ -43,57 +43,47 @@
     }
 
     .container {
-      width: 100%;
-      margin: 0;
+      max-width: 1000px;
+      margin: 30px auto;
       padding: 20px;
       display: grid;
       gap: 20px;
-      box-sizing: border-box;
     }
 
     .actions {
       display: flex;
-      gap: 10px;
+      gap: 15px;
       justify-content: flex-end;
       margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-
-    .actions button {
-      width: 40px;
-      min-width: 40px;
-      padding: 8px;
-      text-align: center;
-      font-size: 1.2rem;
     }
 
     .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      width: 100%;
-      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
     }
 
-    select, button.primary {
+    select, button {
       padding: 10px;
       font-size: 0.95rem;
       border-radius: 8px;
       border: 1px solid #c7d2fe;
-      flex: 1 1 140px;
-      max-width: 140px;
-      box-sizing: border-box;
-      background-color: #60a5fa;
+    }
+
+    select {
+      background: #60a5fa;
       color: white;
-      text-align: center;
     }
 
     button.primary {
       background: var(--primary);
+      color: white;
       border: none;
       cursor: pointer;
       font-weight: bold;
-      min-width: 140px;
+      padding: 10px 18px;
+      font-size: 1rem;
+      border-radius: 8px;
     }
 
     .result, .todayCard, .weeklyCard {
@@ -103,8 +93,6 @@
       padding: 25px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       text-align: left;
-      width: 100%;
-      box-sizing: border-box;
     }
 
     table {
@@ -141,24 +129,6 @@
       font-size: 0.9rem;
       color: var(--muted);
       line-height: 1.4;
-    }
-
-    @media(max-width:600px){
-      .controls {
-        flex-direction: column;
-        gap: 8px;
-      }
-      select, button.primary {
-        max-width: 100%;
-        width: 100%;
-      }
-      .actions {
-        justify-content: flex-end;
-      }
-      .actions button {
-        width: 35px;
-        min-width: 35px;
-      }
     }
   </style>
 </head>
