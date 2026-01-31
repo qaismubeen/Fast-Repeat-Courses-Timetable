@@ -1,88 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FAST PF Class Schedule</title>
+  <meta name="theme-color" content="#0f172a">
 
   <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #020617;
+      --muted: #64748b;
+      --primary: #1e40af;
+      --accent: #e0e7ff;
+    }
+    body.dark {
+      --bg: #020617;
+      --card: #0f172a;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --primary: #60a5fa;
+      --accent: #1e293b;
+    }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.3s ease;
     }
 
     header {
-      background: #020617;
-      padding: 16px;
+      padding: 18px 20px;
       text-align: center;
-      font-size: 1.3rem;
+      font-size: 1.5rem;
       font-weight: bold;
-      color: #facc15;
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
 
     .container {
       max-width: 1000px;
       margin: 30px auto;
       padding: 20px;
+      display: grid;
+      gap: 20px;
     }
 
     .controls {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 15px;
-      margin-bottom: 25px;
     }
 
     select, button {
       padding: 12px;
       font-size: 1rem;
       border-radius: 8px;
+      border: 1px solid #c7d2fe;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: white;
       border: none;
-    }
-
-    select {
-      background: #020617;
-      color: #e5e7eb;
-      border: 1px solid #334155;
-    }
-
-    button {
-      background: #facc15;
-      color: #020617;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
     }
 
-    button:hover {
-      background: #fde047;
+    button.primary:hover {
+      opacity: 0.9;
     }
 
-    .result {
-      display: none;
-      margin-top: 25px;
-      background: #020617;
+    .result, .todayCard, .weeklyCard {
+      background: var(--card);
+      color: var(--text);
       border-radius: 14px;
       padding: 25px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 1.05rem;
+      font-size: 1rem;
     }
 
     th, td {
-      border: 1px solid #334155;
-      padding: 14px;
+      border: 1px solid #c7d2fe;
+      padding: 12px;
       text-align: center;
     }
 
     th {
-      background: #020617;
-      color: #facc15;
+      background: var(--primary);
+      color: white;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-bottom: 15px;
     }
 
     footer {
@@ -90,7 +122,7 @@
       padding: 15px;
       margin-top: 40px;
       font-size: 0.9rem;
-      color: #94a3b8;
+      color: var(--muted);
     }
   </style>
 </head>
@@ -100,7 +132,19 @@
 
 <div class="container">
 
+  <div class="actions">
+    <button onclick="toggleDark()">Toggle Dark/Light</button>
+    <button onclick="enableNotify()">Enable Notifications</button>
+  </div>
+
   <div class="controls">
+    <select id="section">
+      <option value="">Select Section</option>
+      <option>CS-A</option>
+      <option>CS-B</option>
+      <option>CS-C</option>
+    </select>
+
     <select id="day">
       <option value="">Select Day</option>
       <option>Monday</option>
@@ -109,14 +153,13 @@
       <option>Friday</option>
     </select>
 
-    <select id="section">
-      <option value="">Select Section</option>
-      <option>CS-A</option>
-      <option>CS-B</option>
-      <option>CS-C</option>
-    </select>
+    <button class="primary" id="showBtn">Show Class</button>
+  </div>
 
-    <button id="showBtn">Show Class</button>
+  <div class="todayCard">
+    <span class="badge">Today</span>
+    <h3 id="todayDay">Loading...</h3>
+    <div id="todayClass">Select your section</div>
   </div>
 
   <div class="result" id="result">
@@ -132,6 +175,11 @@
     </table>
   </div>
 
+  <div class="weeklyCard">
+    <span class="badge">Weekly Plan</span>
+    <table id="weekTable"></table>
+  </div>
+
 </div>
 
 <footer>
@@ -139,46 +187,99 @@
 </footer>
 
 <script>
-  const scheduleData = {
-    "Monday-CS-A": { course: "PF", location: "C-303", time: "02:30 - 03:50" },
-    "Monday-CS-B": { course: "PF", location: "C-303", time: "03:55 - 05:15" },
-    "Monday-CS-C": { course: "PF Lab", location: "D Block IT Lab 4", time: "02:30 - 05:15" },
+const scheduleData = {
+  "Monday-CS-A": { course: "PF", location: "C-303", time: "02:30 - 03:50" },
+  "Monday-CS-B": { course: "PF", location: "C-303", time: "03:55 - 05:15" },
+  "Monday-CS-C": { course: "PF Lab", location: "D Block IT Lab 4", time: "02:30 - 05:15" },
 
-    "Tuesday-CS-C": { course: "PF", location: "C-301", time: "03:55 - 05:15" },
+  "Tuesday-CS-C": { course: "PF", location: "C-301", time: "03:55 - 05:15" },
 
-    "Wednesday-CS-A": { course: "PF", location: "C-304", time: "02:30 - 03:50" },
-    "Wednesday-CS-B": { course: "PF", location: "C-304", time: "03:55 - 05:15" },
+  "Wednesday-CS-A": { course: "PF", location: "C-304", time: "02:30 - 03:50" },
+  "Wednesday-CS-B": { course: "PF", location: "C-304", time: "03:55 - 05:15" },
 
-    "Friday-CS-A": { course: "PF Lab", location: "D Block IT Lab 3", time: "08:30 - 11:15" },
-    "Friday-CS-B": { course: "PF Lab", location: "D Block IT Lab 4", time: "02:30 - 05:15" },
-    "Friday-CS-C": { course: "PF", location: "C-303", time: "11:30 - 12:50" }
-  };
+  "Friday-CS-A": { course: "PF Lab", location: "D Block IT Lab 3", time: "08:30 - 11:15" },
+  "Friday-CS-B": { course: "PF Lab", location: "D Block IT Lab 4", time: "02:30 - 05:15" },
+  "Friday-CS-C": { course: "PF", location: "C-303", time: "11:30 - 12:50" }
+};
 
-  document.getElementById("showBtn").addEventListener("click", () => {
-    const day = document.getElementById("day").value;
-    const section = document.getElementById("section").value;
-    const key = `${day}-${section}`;
+const days = ["Monday","Tuesday","Wednesday","Friday"];
 
-    const result = document.getElementById("result");
-    const body = document.getElementById("tableBody");
+const sectionEl = document.getElementById("section");
+const dayEl = document.getElementById("day");
+const tableBody = document.getElementById("tableBody");
+const resultDiv = document.getElementById("result");
+const todayDay = document.getElementById("todayDay");
+const todayClass = document.getElementById("todayClass");
+const weekTable = document.getElementById("weekTable");
 
-    body.innerHTML = "";
+function showClass() {
+  const section = sectionEl.value;
+  const day = dayEl.value;
+  const key = `${day}-${section}`;
 
-    if (!day || !section) {
-      body.innerHTML = `<tr><td colspan="3">Please select both day and section</td></tr>`;
-      result.style.display = "block";
-      return;
-    }
+  tableBody.innerHTML = '';
 
-    if (scheduleData[key]) {
+  if (!section || !day) {
+    tableBody.innerHTML = `<tr><td colspan="3">Please select both section and day</td></tr>`;
+    resultDiv.style.display = 'block';
+    return;
+  }
+
+  if (scheduleData[key]) {
+    const c = scheduleData[key];
+    tableBody.innerHTML = `<tr><td>${c.course}</td><td>${c.location}</td><td>${c.time}</td></tr>`;
+  } else {
+    tableBody.innerHTML = `<tr><td colspan="3">No PF class scheduled</td></tr>`;
+  }
+  resultDiv.style.display = 'block';
+}
+
+function updateTodayCard() {
+  const todayName = days[new Date().getDay()-1];
+  todayDay.innerText = todayName || 'No Class Today';
+  const section = sectionEl.value;
+  if(section && scheduleData[`${todayName}-${section}`]){
+    const c = scheduleData[`${todayName}-${section}`];
+    todayClass.innerHTML = `<strong>${c.course}</strong> | ${c.location} | ${c.time}`;
+  } else {
+    todayClass.innerHTML = 'Select your section';
+  }
+}
+
+function buildWeek(section){
+  if(!section) return;
+  let html = '<tr><th>Day</th><th>Course</th><th>Location</th><th>Time</th></tr>';
+  days.forEach(d=>{
+    const key = `${d}-${section}`;
+    if(scheduleData[key]){
       const c = scheduleData[key];
-      body.innerHTML = `<tr><td>${c.course}</td><td>${c.location}</td><td>${c.time}</td></tr>`;
-    } else {
-      body.innerHTML = `<tr><td colspan="3">No PF class scheduled</td></tr>`;
+      html += `<tr><td>${d}</td><td>${c.course}</td><td>${c.location}</td><td>${c.time}</td></tr>`;
+    }else{
+      html += `<tr><td>${d}</td><td colspan="3">No Class</td></tr>`;
     }
-
-    result.style.display = "block";
   });
+  weekTable.innerHTML = html;
+}
+
+sectionEl.addEventListener('change',()=>{
+  updateTodayCard();
+  buildWeek(sectionEl.value);
+});
+
+document.getElementById('showBtn').addEventListener('click', showClass);
+
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  localStorage.setItem('dark',document.body.classList.contains('dark'));
+}
+
+function enableNotify(){
+  Notification.requestPermission();
+  alert('Notifications enabled (browser supported)');
+}
+
+if(localStorage.getItem('dark')==='true') document.body.classList.add('dark');
+updateTodayCard();
 </script>
 
 </body>
